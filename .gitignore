@@ -1,0 +1,8 @@
+.DS_Store   
+__pycache__/
+*.pyc
+.venv/
+
+# Flox writes its own .flox/.gitignore covering run/, cache/, lib/, log/.
+# .flox/env/manifest.toml and .flox/env/manifest.lock are meant to be committed.
+build.md

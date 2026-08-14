@@ -1,0 +1,92 @@
+schema-version = "1.10.0"
+
+# flox-embed — a reproducible embedding API in one Flox manifest.
+#   https://github.com/justincastilla/flox-embed
+#
+# This environment provides the dependencies only. The application itself
+# (app.py, demo.sh) lives in the repo above — `flox push` ships `.flox/` and
+# nothing else, so if you activated this remotely, clone the repo to get the
+# code the [services.api] entry below expects to find.
+
+# ---------------------------------------------------------------------------
+# Everything the service needs: interpreter, Python packages, and the native
+# libraries underneath them. Pinned by hash in manifest.lock.
+# ---------------------------------------------------------------------------
+[install]
+# One pkg-group so these share an interpreter and resolve consistently.
+python.pkg-path                = "python313"
+python.pkg-group               = "py"
+sentence-transformers.pkg-path = "python313Packages.sentence-transformers"
+sentence-transformers.pkg-group = "py"
+fastapi.pkg-path               = "python313Packages.fastapi"
+fastapi.pkg-group              = "py"
+uvicorn.pkg-path               = "python313Packages.uvicorn"
+uvicorn.pkg-group              = "py"
+pydantic.pkg-path              = "python313Packages.pydantic"
+pydantic.pkg-group             = "py"
+# Outside the "py" group — they share nothing with the interpreter, so there is
+# no reason to tie them to its resolution.
+curl.pkg-path = "curl"
+jq.pkg-path   = "jq"
+
+# Optional — uncomment to compose a vector store alongside the API.
+# qdrant.pkg-path = "qdrant"
+
+[vars]
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_PORT  = "8000"
+
+[hook]
+on-activate = '''
+  # Keep the model cache inside the environment rather than ~/.cache, so it is
+  # per-project and already gitignored. $FLOX_ENV_CACHE is provided by Flox.
+  export HF_HOME="$FLOX_ENV_CACHE/huggingface"
+  export SENTENCE_TRANSFORMERS_HOME="$FLOX_ENV_CACHE/sentence-transformers"
+  mkdir -p "$HF_HOME" "$SENTENCE_TRANSFORMERS_HOME"
+
+  # Pre-warm the model so the first /embed is not a download.
+  # Sentinel-guarded: downloads once, ever.
+  # Skip with FLOX_EMBED_SKIP_PREWARM=1.
+  if [ -z "$FLOX_EMBED_SKIP_PREWARM" ] && [ ! -f "$SENTENCE_TRANSFORMERS_HOME/.warmed" ]; then
+    echo "→ pre-warming $EMBED_MODEL (one time)"
+    if python -c "
+from sentence_transformers import SentenceTransformer
+SentenceTransformer('$EMBED_MODEL', device='cpu').encode(['warmup'])
+" >"$SENTENCE_TRANSFORMERS_HOME/prewarm.log" 2>&1; then
+      touch "$SENTENCE_TRANSFORMERS_HOME/.warmed"
+      echo "→ model cached"
+    else
+      echo "→ pre-warm failed; the API will fetch on first request. Reason:"
+      tail -5 "$SENTENCE_TRANSFORMERS_HOME/prewarm.log" | sed 's/^/    /'
+    fi
+  fi
+'''
+
+# ---------------------------------------------------------------------------
+# Supervision. `flox activate -s` starts everything below.
+# ---------------------------------------------------------------------------
+# EMBED_RELOAD is deliberately NOT in [vars] — [vars] would clobber whatever
+# you export in the parent shell. Left unset, ${EMBED_RELOAD:+...} expands to
+# nothing. For live reload: EMBED_RELOAD=1 flox activate -s
+#
+# There is no `[services] auto-start` on purpose: activation stays inert, so
+# this environment is also useful on its own, without trying to start a service
+# whose source code it may not have.
+[services.api]
+command = 'exec uvicorn app:app --host 0.0.0.0 --port "$EMBED_PORT" ${EMBED_RELOAD:+--reload --reload-dir "$FLOX_ENV_PROJECT"}'
+
+# Optional — uncomment together with qdrant in [install]. `flox activate -s`
+# starts every service in the manifest, so leaving it commented keeps the
+# default path to one process.
+# [services.qdrant]
+# command = 'exec qdrant'
+# vars.QDRANT__STORAGE__STORAGE_PATH   = "$FLOX_ENV_CACHE/qdrant/storage"
+# vars.QDRANT__STORAGE__SNAPSHOTS_PATH = "$FLOX_ENV_CACHE/qdrant/snapshots"
+# vars.QDRANT__SERVICE__HTTP_PORT      = "6333"
+
+[containerize.config]
+exposed-ports = ["8000/tcp"]
+cmd           = []
+
+[options]
+systems = ["aarch64-darwin", "aarch64-linux", "x86_64-linux"]

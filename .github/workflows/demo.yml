@@ -1,0 +1,39 @@
+# Runs the demo on every system the manifest claims to support, so the README's
+# "works on" list is enforced rather than remembered.
+
+name: demo
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  demo:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            system: x86_64-linux
+          - runner: ubuntu-24.04-arm
+            system: aarch64-linux
+          - runner: macos-14
+            system: aarch64-darwin
+    name: ${{ matrix.system }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Flox
+        uses: flox/install-flox-action@3b80351ae97bbe063f264dc88fbd505507054963 # v2.5.3
+
+      - name: Environment resolves on ${{ matrix.system }}
+        run: |
+          flox --version
+          flox list -d .
+
+      - name: Run the demo
+        run: flox activate -s -- ./demo.sh

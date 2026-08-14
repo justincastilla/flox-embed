@@ -1,0 +1,729 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "schema-version": "1.10.0",
+    "install": {
+      "curl": {
+        "pkg-path": "curl"
+      },
+      "fastapi": {
+        "pkg-path": "python313Packages.fastapi",
+        "pkg-group": "py"
+      },
+      "jq": {
+        "pkg-path": "jq"
+      },
+      "pydantic": {
+        "pkg-path": "python313Packages.pydantic",
+        "pkg-group": "py"
+      },
+      "python": {
+        "pkg-path": "python313",
+        "pkg-group": "py"
+      },
+      "sentence-transformers": {
+        "pkg-path": "python313Packages.sentence-transformers",
+        "pkg-group": "py"
+      },
+      "uvicorn": {
+        "pkg-path": "python313Packages.uvicorn",
+        "pkg-group": "py"
+      }
+    },
+    "vars": {
+      "EMBED_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
+      "EMBED_PORT": "8000"
+    },
+    "hook": {
+      "on-activate": "  # Keep the model cache inside the environment rather than ~/.cache, so it is\n  # per-project and already gitignored. $FLOX_ENV_CACHE is provided by Flox.\n  export HF_HOME=\"$FLOX_ENV_CACHE/huggingface\"\n  export SENTENCE_TRANSFORMERS_HOME=\"$FLOX_ENV_CACHE/sentence-transformers\"\n  mkdir -p \"$HF_HOME\" \"$SENTENCE_TRANSFORMERS_HOME\"\n\n  # Pre-warm the model so the first /embed is not a download.\n  # Sentinel-guarded: downloads once, ever.\n  # Skip with FLOX_EMBED_SKIP_PREWARM=1.\n  if [ -z \"$FLOX_EMBED_SKIP_PREWARM\" ] && [ ! -f \"$SENTENCE_TRANSFORMERS_HOME/.warmed\" ]; then\n    echo \"→ pre-warming $EMBED_MODEL (one time)\"\n    if python -c \"\nfrom sentence_transformers import SentenceTransformer\nSentenceTransformer('$EMBED_MODEL', device='cpu').encode(['warmup'])\n\" >\"$SENTENCE_TRANSFORMERS_HOME/prewarm.log\" 2>&1; then\n      touch \"$SENTENCE_TRANSFORMERS_HOME/.warmed\"\n      echo \"→ model cached\"\n    else\n      echo \"→ pre-warm failed; the API will fetch on first request. Reason:\"\n      tail -5 \"$SENTENCE_TRANSFORMERS_HOME/prewarm.log\" | sed 's/^/    /'\n    fi\n  fi\n"
+    },
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-linux"
+      ]
+    },
+    "services": {
+      "api": {
+        "command": "exec uvicorn app:app --host 0.0.0.0 --port \"$EMBED_PORT\" ${EMBED_RELOAD:+--reload --reload-dir \"$FLOX_ENV_PROJECT\"}"
+      }
+    },
+    "containerize": {
+      "config": {
+        "exposed-ports": [
+          "8000/tcp"
+        ],
+        "cmd": []
+      }
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "python313Packages.fastapi",
+      "broken": false,
+      "derivation": "/nix/store/h5mrsrhl3hknmj1g83lzkmcahjzz1rjr-python3.13-fastapi-0.139.0.drv",
+      "description": "Web framework for building APIs",
+      "install_id": "fastapi",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-fastapi-0.139.0",
+      "pname": "fastapi",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:01:15.179289Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.139.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/cc1v7w2cjqk8ggiw8sqpcmn7h1dmg8ml-python3.13-fastapi-0.139.0-dist",
+        "out": "/nix/store/bfca3bs8rldlmawv9hp2wf72y44nya90-python3.13-fastapi-0.139.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.fastapi",
+      "broken": false,
+      "derivation": "/nix/store/jjrgly82pdjyf7nj4chzbflyhbcmr326-python3.13-fastapi-0.139.0.drv",
+      "description": "Web framework for building APIs",
+      "install_id": "fastapi",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-fastapi-0.139.0",
+      "pname": "fastapi",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:35:41.730159Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.139.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/ylsxf6d726wwpkmar8ji2j5lhn8krmqv-python3.13-fastapi-0.139.0-dist",
+        "out": "/nix/store/znfygid4fwrm86xp6kgl3qqg7nivrjk8-python3.13-fastapi-0.139.0"
+      },
+      "system": "aarch64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.fastapi",
+      "broken": false,
+      "derivation": "/nix/store/1xayqm4fnrjkq96h5qpc1a350y3lx30g-python3.13-fastapi-0.139.0.drv",
+      "description": "Web framework for building APIs",
+      "install_id": "fastapi",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-fastapi-0.139.0",
+      "pname": "fastapi",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:16:07.690136Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.139.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/1mivyg9aiivgiklkvk5mjy28xjkfha8v-python3.13-fastapi-0.139.0-dist",
+        "out": "/nix/store/k8f7a9sfwhyikn56dz87krfn33ywvwb2-python3.13-fastapi-0.139.0"
+      },
+      "system": "x86_64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.pydantic",
+      "broken": false,
+      "derivation": "/nix/store/xxy35rlldds1by22kdmlbc12n17a0gld-python3.13-pydantic-2.13.4.drv",
+      "description": "Data validation and settings management using Python type hinting",
+      "install_id": "pydantic",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-pydantic-2.13.4",
+      "pname": "pydantic",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:01:23.411443Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/92xqb806j89sbacdvvvik2w9rl5l88bl-python3.13-pydantic-2.13.4-dist",
+        "out": "/nix/store/birjccn1pjy9qnffk528f4lii5w3cm4i-python3.13-pydantic-2.13.4"
+      },
+      "system": "aarch64-darwin",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.pydantic",
+      "broken": false,
+      "derivation": "/nix/store/qch1xnmhmf2h61qba1sd2pni1pnw99xh-python3.13-pydantic-2.13.4.drv",
+      "description": "Data validation and settings management using Python type hinting",
+      "install_id": "pydantic",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-pydantic-2.13.4",
+      "pname": "pydantic",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:35:51.780565Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/s7dqwzz04skngk3f55m7cihwvbacb7mn-python3.13-pydantic-2.13.4-dist",
+        "out": "/nix/store/3xxjqqqcxg1mxfq16rs9gx2zf2dvs8fc-python3.13-pydantic-2.13.4"
+      },
+      "system": "aarch64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.pydantic",
+      "broken": false,
+      "derivation": "/nix/store/iqn98a40lxbgchpzn33pgrbca9kp25ww-python3.13-pydantic-2.13.4.drv",
+      "description": "Data validation and settings management using Python type hinting",
+      "install_id": "pydantic",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-pydantic-2.13.4",
+      "pname": "pydantic",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:16:18.202744Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/5zkfwd79dqrs8vrwvzrhgj4fwzjkrqz2-python3.13-pydantic-2.13.4-dist",
+        "out": "/nix/store/rh0nxblcnaml3c891vg4g1gx6zkqqiw2-python3.13-pydantic-2.13.4"
+      },
+      "system": "x86_64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313",
+      "broken": false,
+      "derivation": "/nix/store/iabk3kr9wlinhcc2a2sdxsn9f08q6dgk-python3-3.13.14.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3-3.13.14",
+      "pname": "python313",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:01:09.497319Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.13.14",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/nvj4m47x6c3n3kqfk70fk5y598x8c4s8-python3-3.13.14"
+      },
+      "system": "aarch64-darwin",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313",
+      "broken": false,
+      "derivation": "/nix/store/i7blzq62b45fg6xb2yb1wwg5lrdqr1pp-python3-3.13.14.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3-3.13.14",
+      "pname": "python313",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:35:35.236164Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.13.14",
+      "outputs_to_install": [
+        "out",
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/pdlhsmfyfji4g43zpim9q4ipq8xm75af-python3-3.13.14-debug",
+        "out": "/nix/store/aihp1b5bb49f4xwy1pzy4ms435ansvvs-python3-3.13.14"
+      },
+      "system": "aarch64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313",
+      "broken": false,
+      "derivation": "/nix/store/cd1hxnd2kd6kvc1ma3h85h2hhm7dpjz3-python3-3.13.14.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3-3.13.14",
+      "pname": "python313",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:16:00.492898Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.13.14",
+      "outputs_to_install": [
+        "out",
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/7m2jh7dgbxwpgz91dx7mswhqyxdvxiwi-python3-3.13.14-debug",
+        "out": "/nix/store/miscphl6g76fp89z2drc18dckh2cx9ky-python3-3.13.14"
+      },
+      "system": "x86_64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.sentence-transformers",
+      "broken": false,
+      "derivation": "/nix/store/bv5w42smgr4vx6qr7pjpm8jm2frx6cyn-python3.13-sentence-transformers-5.7.0.drv",
+      "description": "Multilingual Sentence & Image Embeddings with BERT",
+      "install_id": "sentence-transformers",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-sentence-transformers-5.7.0",
+      "pname": "sentence-transformers",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:01:27.439054Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/k4hlxbqaggy2pyzq9czissc0s9hwxjaf-python3.13-sentence-transformers-5.7.0-dist",
+        "out": "/nix/store/dj72b7mv6r7sqln292gzzrymlscnjzxf-python3.13-sentence-transformers-5.7.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.sentence-transformers",
+      "broken": false,
+      "derivation": "/nix/store/dfl697fii1zh98masbay7cczi10x20nh-python3.13-sentence-transformers-5.7.0.drv",
+      "description": "Multilingual Sentence & Image Embeddings with BERT",
+      "install_id": "sentence-transformers",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-sentence-transformers-5.7.0",
+      "pname": "sentence-transformers",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:35:56.798407Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/mll1ylw13ib8229xca3lc89gxzqql5sp-python3.13-sentence-transformers-5.7.0-dist",
+        "out": "/nix/store/aarwdc1953y5x86b4c0wrqdkb6s68lk1-python3.13-sentence-transformers-5.7.0"
+      },
+      "system": "aarch64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.sentence-transformers",
+      "broken": false,
+      "derivation": "/nix/store/v9iiqc4g29xxp8s2ggw4nnyn90gbkjjm-python3.13-sentence-transformers-5.7.0.drv",
+      "description": "Multilingual Sentence & Image Embeddings with BERT",
+      "install_id": "sentence-transformers",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-sentence-transformers-5.7.0",
+      "pname": "sentence-transformers",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:16:23.205878Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/145g1rras8px0y2l8z1qx5qh27bspi9x-python3.13-sentence-transformers-5.7.0-dist",
+        "out": "/nix/store/sfd4h3610h35ldqgdvzqxbby7brf8y49-python3.13-sentence-transformers-5.7.0"
+      },
+      "system": "x86_64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.uvicorn",
+      "broken": false,
+      "derivation": "/nix/store/xccif9qmixj2jprnr991118rzam9x9v5-python3.13-uvicorn-0.51.0.drv",
+      "description": "Lightning-fast ASGI server",
+      "install_id": "uvicorn",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-uvicorn-0.51.0",
+      "pname": "uvicorn",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:01:31.678363Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/ngj873haw2088rl2gimlij8lclj5bbla-python3.13-uvicorn-0.51.0-dist",
+        "out": "/nix/store/njxpsaascvqlnf2kgnqyzf4mi95a9rbg-python3.13-uvicorn-0.51.0",
+        "testsout": "/nix/store/ixmqzqdjn094y7wfd64asyhhwlnpq1mn-python3.13-uvicorn-0.51.0-testsout"
+      },
+      "system": "aarch64-darwin",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.uvicorn",
+      "broken": false,
+      "derivation": "/nix/store/lpfhysw3kpg4p9v1namnagk4l6rcn5s3-python3.13-uvicorn-0.51.0.drv",
+      "description": "Lightning-fast ASGI server",
+      "install_id": "uvicorn",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-uvicorn-0.51.0",
+      "pname": "uvicorn",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:36:02.117994Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/zh1rjgymfsi2jwdqx68b55zpk1s2i07z-python3.13-uvicorn-0.51.0-dist",
+        "out": "/nix/store/i3r5m3y401h8jjprngszcblh9agjm9ag-python3.13-uvicorn-0.51.0",
+        "testsout": "/nix/store/zsp8n3kv0rnvg7zjka1iwmaszvfy1hn2-python3.13-uvicorn-0.51.0-testsout"
+      },
+      "system": "aarch64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "python313Packages.uvicorn",
+      "broken": false,
+      "derivation": "/nix/store/bgqi5q68y4jaizk9krawdvmlqs2wdqn4-python3.13-uvicorn-0.51.0.drv",
+      "description": "Lightning-fast ASGI server",
+      "install_id": "uvicorn",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "python3.13-uvicorn-0.51.0",
+      "pname": "uvicorn",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:16:28.392385Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/imbn5ckvsmdbs64z28az4qrjmy7sn03m-python3.13-uvicorn-0.51.0-dist",
+        "out": "/nix/store/4q5q71ip0ynrsq7lq7dbzbvs2vfyiwp5-python3.13-uvicorn-0.51.0",
+        "testsout": "/nix/store/w96vp86jbhq109z80dchkkgn7dbzcsa9-python3.13-uvicorn-0.51.0-testsout"
+      },
+      "system": "x86_64-linux",
+      "group": "py",
+      "priority": 5
+    },
+    {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/kmjvzmpvv52wcqd46b5mnivm402ybwsw-curl-8.21.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "curl-8.21.0",
+      "pname": "curl",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:00:26.646Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.21.0",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/i9x58dsgzki6dc86xcx9s4q40rsl6hka-curl-8.21.0-bin",
+        "dev": "/nix/store/8hsd5wh5j9yjmfdjblln2m82cmbjdbr7-curl-8.21.0-dev",
+        "devdoc": "/nix/store/31ksgn2zs5f46781kmisl5sdkdp2s9yz-curl-8.21.0-devdoc",
+        "man": "/nix/store/6mg0kqqyc0mq19zk2218vv17g16nyjip-curl-8.21.0-man",
+        "out": "/nix/store/qpx02xxp8nphlljkrr5zfy76jzld1r1r-curl-8.21.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/8jdpfv92yvjidfcl9wvj0kr3kxb14vdm-curl-8.21.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "curl-8.21.0",
+      "pname": "curl",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:34:35.726882Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.21.0",
+      "outputs_to_install": [
+        "bin",
+        "bin",
+        "man",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/gmlc0lv0z8j2fd0bdzmcv7kmwgbpcik2-curl-8.21.0-bin",
+        "debug": "/nix/store/bz0h8w93hps2g55588a7q93n57g3bsyd-curl-8.21.0-debug",
+        "dev": "/nix/store/pkxl2vfyqgmfbn0nb9xa3sb5rrahpcdb-curl-8.21.0-dev",
+        "devdoc": "/nix/store/k6mayhfn6fm9wgvjj89p8dxfzd7vnm7q-curl-8.21.0-devdoc",
+        "man": "/nix/store/wb2v4026n32dcn1007pvx21x8rpp30pz-curl-8.21.0-man",
+        "out": "/nix/store/bz4v0n1cip3m5fzzwanxl463x60drmx1-curl-8.21.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/xw1nhf19nh1vx8hdl7kqv7s9242c52zv-curl-8.21.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "curl-8.21.0",
+      "pname": "curl",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:14:57.400414Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.21.0",
+      "outputs_to_install": [
+        "bin",
+        "bin",
+        "man",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/61r7fpwz7hk9v7yn1h6jvrn0d5d7fl5c-curl-8.21.0-bin",
+        "debug": "/nix/store/f26nqvarisbprb3596nj6s0b0903wgjq-curl-8.21.0-debug",
+        "dev": "/nix/store/d0a0g5q9spi04dpz89n4wqnzv8synh73-curl-8.21.0-dev",
+        "devdoc": "/nix/store/9wdmr8rg456874gln1m0iz4cf6jx9f9i-curl-8.21.0-devdoc",
+        "man": "/nix/store/zbn932lif63l9qswvp164nlycs6iz4zf-curl-8.21.0-man",
+        "out": "/nix/store/9gg2kw74rag1sjl2jl6qaddaisllpdip-curl-8.21.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "jq",
+      "broken": false,
+      "derivation": "/nix/store/45j7x06lz3jrdwsahvlds5n1v0fq59wc-jq-1.8.2.drv",
+      "description": "Lightweight and flexible command-line JSON processor",
+      "install_id": "jq",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "jq-1.8.2",
+      "pname": "jq",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:00:44.296140Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.2",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/si622aj9znsy96kdwsrg54dxzp9m35qw-jq-1.8.2-bin",
+        "dev": "/nix/store/zcvl9cnw5a44f74gw8aa8fh8cfynjc76-jq-1.8.2-dev",
+        "doc": "/nix/store/4s66blj2afdqbzaq8ilw30v7kpjb6ypw-jq-1.8.2-doc",
+        "man": "/nix/store/jp2c61il2ycagni1j5c1jrglnypvbf5k-jq-1.8.2-man",
+        "out": "/nix/store/z28yr7h99fi3mch4dh3bc50bjk6malsl-jq-1.8.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "jq",
+      "broken": false,
+      "derivation": "/nix/store/lpj1cw1ipnqdc3d3wxz4ry5lcf6hk075-jq-1.8.2.drv",
+      "description": "Lightweight and flexible command-line JSON processor",
+      "install_id": "jq",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "jq-1.8.2",
+      "pname": "jq",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T05:34:57.174712Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.2",
+      "outputs_to_install": [
+        "bin",
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/rjaclwgima9ssysv7v0h2hq46g8sikd4-jq-1.8.2-bin",
+        "dev": "/nix/store/yy0mx8yjmzkk154mmp1vx4b0kz0ndw6y-jq-1.8.2-dev",
+        "doc": "/nix/store/yqx0xva9dq6rnvxgwcadrmni1l8ympa1-jq-1.8.2-doc",
+        "man": "/nix/store/1w15pijismpwnainv71a6pdnsypjnqg7-jq-1.8.2-man",
+        "out": "/nix/store/0x995g1z807ynhzsh2f6yj0jsw6pr50f-jq-1.8.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "jq",
+      "broken": false,
+      "derivation": "/nix/store/bcp8pk4lzbfxrlgicm9i8jlwidg6x6jg-jq-1.8.2.drv",
+      "description": "Lightweight and flexible command-line JSON processor",
+      "install_id": "jq",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "name": "jq-1.8.2",
+      "pname": "jq",
+      "rev": "2fcb964de67fcf60b43471c55d5d99e61a9ccb5a",
+      "rev_count": 1051473,
+      "rev_date": "2026-08-10T17:52:38Z",
+      "scrape_date": "2026-08-12T06:15:20.174753Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.2",
+      "outputs_to_install": [
+        "bin",
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/4b6f9wb1qak318gk7mxlfkhril6lxpcx-jq-1.8.2-bin",
+        "dev": "/nix/store/sp8a7n50g32lzzsc7dz09ry2vc9bh4y0-jq-1.8.2-dev",
+        "doc": "/nix/store/dp4rs4vpwp44c7vvgskj1hly0d6xqf2m-jq-1.8.2-doc",
+        "man": "/nix/store/4zwaa20khsi2drbg16i5z3wxbjf88mm6-jq-1.8.2-man",
+        "out": "/nix/store/z438hrlp3j75bpmq87ymzabb8vrda8ps-jq-1.8.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}
